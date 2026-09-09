@@ -1,0 +1,29 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/nbe-core",
+    "crates/nbe-util",
+    "crates/nbe-ipc",
+    "crates/nbe-net",
+    "crates/nbe-parse-html",
+    "crates/nbe-parse-css",
+    "crates/nbe-dom",
+    "crates/nbe-text",
+    "crates/nbe-layout",
+    "crates/nbe-paint",
+    "crates/nbe-js",
+    "crates/nbe-bindings",
+    "crates/nbe-webapi",
+    "crates/nbe-renderer",
+    "crates/nbe-shell",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[workspace.dependencies]
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }

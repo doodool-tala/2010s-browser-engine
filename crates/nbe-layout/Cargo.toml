@@ -1,0 +1,7 @@
+[package]
+name = "nbe-layout"
+description = "Box tree and block, inline, float, and table layout"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
