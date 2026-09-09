@@ -10,7 +10,7 @@ jobs:
           fetch-depth: 0
       - name: Trusted files are append-only; gate and specs are immutable
         run: |
-          CHANGED=$(git diff origin/main...HEAD --diff-filter=M,D --name-only -- scripts docs/pp)
+          CHANGED=$(git diff origin/main...HEAD --diff-filter=MD --name-only -- scripts docs/pp)
           if [ -n "$CHANGED" ]; then
             echo "FAIL: trusted files modified or deleted:"
             echo "$CHANGED"
