@@ -1,0 +1,11 @@
+name: ci
+on: [pull_request, push]
+
+jobs:
+  gate-g1:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+      - name: Gate G1
+        run: bash scripts/check-g1.sh

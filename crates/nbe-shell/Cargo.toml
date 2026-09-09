@@ -1,0 +1,11 @@
+[package]
+name = "nbe-shell"
+description = "Browser process: the 2011-Chrome UI shell (substrate smoke test at PP-01)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+nbe-core = { path = "../nbe-core" }
+tracing = { workspace = true }
