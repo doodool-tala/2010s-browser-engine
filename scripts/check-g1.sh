@@ -36,7 +36,7 @@ fi
 
 echo "== G1.7 log determinism =="
 A=$(cargo run -q -p nbe-shell 2>&1 >/dev/null)
-B=$(cargo run -q -p nbe-shell 2>&1 >/decl)
+B=$(cargo run -q -p nbe-shell 2>&1 >/dev/null)
 if [ "$A" != "$B" ]; then
   echo "G1 FAIL: log output not deterministic"
   exit 1
