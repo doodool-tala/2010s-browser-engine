@@ -6,6 +6,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Trusted files are append-only; gate and specs are immutable
+        run: |
+          CHANGED=$(git diff origin/main...HEAD --diff-filter=M,D --name-only -- scripts docs/pp)
+          if [ -n "$CHANGED" ]; then
+            echo "FAIL: trusted files modified or deleted:"
+            echo "$CHANGED"
+            exit 1
+          fi
       - uses: Swatinem/rust-cache@v2
       - name: Gate G1
         run: bash scripts/check-g1.sh
