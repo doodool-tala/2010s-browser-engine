@@ -23,8 +23,11 @@
     )
 )]
 
+pub mod clock;
 pub mod error;
 pub mod logging;
+pub mod rng;
+pub mod snapshot;
 pub mod tick;
 
 #[cfg(test)]
