@@ -6,3 +6,4 @@ is a bug.
 
 | ID | Area | WebKit-2011 behavior | Our behavior | Rationale | PP |
 |----|------|----------------------|--------------|-----------|-----|
+| DV-001 | IPC wire format | Chrome 2011: proprietary binary IPC | length-prefixed serde_json frames | debuggable, byte-deterministic, adequate at our scale | PP-03 |
