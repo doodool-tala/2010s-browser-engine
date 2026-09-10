@@ -2,7 +2,7 @@
 
 - G1 (ACTIVE from PP-01): fmt clean, clippy clean with restriction lints,
   all tests pass, release build, forbidden-dependency check, unsafe
-  tripwire, log determinism. Run: `bash scripts/check-g1.sh`
+  tripwire, log determinism, lockfile consistency (CI-enforced). Run: `bash scripts/check-g1.sh`
 - G2 (future): html5lib tokenizer + tree-construction suites at 100%.
 - G3 (future): curated CSS 2.1 reftest subset.
 - G4 (future): test262 ES5.1 at >= 99% with reviewed allowlist.
