@@ -16,6 +16,8 @@ jobs:
             echo "$CHANGED"
             exit 1
           fi
+      - name: Lockfile must be committed and in sync
+        run: cargo metadata --locked --format-version 1 > /dev/null
       - uses: Swatinem/rust-cache@v2
       - name: Gate G1
         run: bash scripts/check-g1.sh
