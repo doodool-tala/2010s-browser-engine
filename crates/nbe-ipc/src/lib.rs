@@ -1,9 +1,10 @@
 //! # nbe-ipc
 //!
-//! The process boundary: message schemas, length-prefixed framing, and
-//! the v1 in-process transport. The browser process (nbe-shell) and
-//! renderer processes (nbe-renderer, from PP-04) speak ONLY through
-//! this crate — never by linking to each other.
+//! The process boundary: message schemas, length-prefixed framing, the
+//! v1 in-process transport, pipe transport for real child processes,
+//! and the renderer supervisor. The browser process (nbe-shell) and
+//! renderer processes (nbe-renderer) speak ONLY through this crate —
+//! never by linking to each other.
 //!
 //! Wire format locked by the golden test.
 
@@ -25,4 +26,6 @@
 pub mod frame;
 pub mod ids;
 pub mod message;
+pub mod pipe;
+pub mod supervisor;
 pub mod transport;
