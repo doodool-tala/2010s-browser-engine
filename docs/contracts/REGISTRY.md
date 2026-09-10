@@ -16,3 +16,6 @@ vN to vN+1: additive only. Breaking changes: new major row + amendment.
 | C-007 | IPC message schema (IpcMessage + IpcEnvelope) | nbe_ipc::message | v1 | PP-03 | frozen |
 | C-008 | Length-prefixed frame codec | nbe_ipc::frame | v1 | PP-03 | frozen |
 | C-009 | In-process IPC channel pair | nbe_ipc::transport | v1 | PP-03 | frozen |
+| C-010 | Pipe transport (send_envelope + FrameReader) | nbe_ipc::pipe | v1 | PP-04 | frozen |
+| C-011 | Renderer supervisor (spawn, send, recv, poll) | nbe_ipc::supervisor | v1 | PP-04 | frozen |
+| C-012 | Renderer binary protocol loop | nbe_renderer bin | v1 | PP-04 | frozen |

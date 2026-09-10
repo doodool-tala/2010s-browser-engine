@@ -101,6 +101,13 @@ version = "0.1.0"
 [[package]]
 name = "nbe-renderer"
 version = "0.1.0"
+dependencies = [
+ "nbe-core",
+ "nbe-ipc",
+ "serde_json",
+ "tracing",
+ "tracing-subscriber",
+]
 
 [[package]]
 name = "nbe-shell"
