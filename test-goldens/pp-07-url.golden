@@ -1,0 +1,12 @@
+https://example.com/ => https://example.com/
+http://example.com/path/to/page?name=ferret#fragment => http://example.com/path/to/page?name=ferret#fragment
+HTTP://ExAmPle.CoM/Path => http://example.com/Path
+http://a.com:80/x => http://a.com/x
+http://a.com:8080/x => http://a.com:8080/x
+http://0x7f.1/ => http://127.0.0.1/
+http://[::1]/ => http://[::1]/
+http://[2001:db8::1]/ => http://[2001:db8::1]/
+http://[::ffff:1.2.3.4]/ => http://[::ffff:102:304]/
+http://user:pass@example.com/x => http://user:pass@example.com/x
+http://a/b/c/./../d => http://a/b/d
+http://a.com./ => http://a.com/
