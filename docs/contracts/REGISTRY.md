@@ -25,3 +25,6 @@ vN to vN+1: additive only. Breaking changes: new major row + amendment.
 | C-016 | Renderer event loop (lanes, virtual time, turns) | nbe_renderer::eventloop::EventLoop | v1 | PP-06 | frozen |
 | C-017 | Task context handle | nbe_renderer::eventloop::LoopHandle | v1 | PP-06 | frozen |
 | C-018 | Turn outcome reporting | nbe_renderer::eventloop::TurnOutcome | v1 | PP-06 | frozen |
+| C-019 | URL parse + serialize (absolute http/https) | nbe_net::url | v1 | PP-07 | frozen |
+| C-020 | Host model (domain, IPv4, IPv6) | nbe_net::url::Host | v1 | PP-07 | frozen |
+| C-021 | Origin (scheme, host, port) | nbe_net::origin | v1 | PP-07 | frozen |

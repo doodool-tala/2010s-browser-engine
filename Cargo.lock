@@ -88,6 +88,9 @@ version = "0.1.0"
 [[package]]
 name = "nbe-net"
 version = "0.1.0"
+dependencies = [
+ "nbe-core",
+]
 
 [[package]]
 name = "nbe-paint"
