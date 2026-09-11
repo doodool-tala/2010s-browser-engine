@@ -19,3 +19,6 @@ vN to vN+1: additive only. Breaking changes: new major row + amendment.
 | C-010 | Pipe transport (send_envelope + FrameReader) | nbe_ipc::pipe | v1 | PP-04 | frozen |
 | C-011 | Renderer supervisor (spawn, send, recv, poll) | nbe_ipc::supervisor | v1 | PP-04 | frozen |
 | C-012 | Renderer binary protocol loop | nbe_renderer bin | v1 | PP-04 | frozen |
+| C-013 | WebIDL subset parser | nbe_bindings::idl | v1 | PP-05 | frozen |
+| C-014 | Rust interface generator | nbe_bindings::gen | v1 | PP-05 | frozen |
+| C-015 | Generated DOM interface traits | nbe_dom::interfaces | v1 | PP-05 | frozen |
