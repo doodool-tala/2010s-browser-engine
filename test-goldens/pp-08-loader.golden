@@ -1,0 +1,7 @@
+f3 http://a.test/c Ok bytes=8
+f1 http://a.test/a Ok bytes=8
+f4 http://a.test/e Err [mock-transport] connection reset
+f2 http://a.test/b Ok bytes=8
+idle
+f5 http://a.test/a Ok bytes=8
+cached=2 bytes=16 calls=4
