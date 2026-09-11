@@ -121,3 +121,39 @@ fn renderer_exits_clean_on_stdin_eof() {
     let output = child.wait_with_output().unwrap();
     assert!(output.status.success());
 }
+
+#[test]
+fn ping_replies_preserve_fifo_order_through_the_loop() {
+    let mut supervisor = Supervisor::new(renderer_command);
+    let pid = supervisor.spawn_renderer().unwrap();
+    supervisor
+        .send(
+            pid,
+            &IpcEnvelope::new(ProcessId::BROWSER, pid, IpcMessage::Initialize),
+        )
+        .unwrap();
+    let ready = supervisor.recv(pid).unwrap().unwrap();
+    assert_eq!(ready.payload, IpcMessage::Ready { pid });
+
+    for nonce in 1..=3u64 {
+        supervisor
+            .send(
+                pid,
+                &IpcEnvelope::new(ProcessId::BROWSER, pid, IpcMessage::Ping { nonce }),
+            )
+            .unwrap();
+    }
+    for nonce in 1..=3u64 {
+        let reply = supervisor.recv(pid).unwrap().unwrap();
+        assert_eq!(reply.payload, IpcMessage::Pong { nonce });
+    }
+
+    supervisor
+        .send(
+            pid,
+            &IpcEnvelope::new(ProcessId::BROWSER, pid, IpcMessage::Shutdown),
+        )
+        .unwrap();
+    let status = supervisor.wait_exit(pid).unwrap();
+    assert_eq!(status, RendererExitStatus::Clean);
+}

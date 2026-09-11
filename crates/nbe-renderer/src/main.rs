@@ -1,19 +1,23 @@
 //! # nbe-renderer (binary)
 //!
-//! The renderer process. v1 (PP-04): a protocol-conforming
-//! placeholder; the render pipeline and event loop arrive at PP-06.
-//! Speaks length-prefixed JSON envelopes on stdin/stdout per ADR-0005:
-//! Initialize → Ready{pid}, Ping{nonce} → Pong{nonce}, Shutdown →
-//! exit 0. NBE_RENDERER_FAULT=exit-early exits 1 at startup (fault
-//! injection for crash-detection tests).
+//! The renderer process. v1 protocol placeholder (PP-04); PP-06 puts
+//! its message handling on the event loop: Initialize replies via a
+//! normal task, Ping replies ride the urgent (input-priority) lane,
+//! Shutdown drains the loop and exits. Virtual time advances only
+//! inside the loop; blocking on IPC pauses it. Speaks
+//! length-prefixed JSON envelopes on stdin/stdout per ADR-0005.
+//! NBE_RENDERER_FAULT=exit-early exits 1 at startup (fault injection
+//! for crash-detection tests).
 
-use std::io::{Read, Write};
+use std::io::Read;
 use std::process::ExitCode;
 
 use nbe_core::error::ModuleError;
-use nbe_ipc::frame::{encode_frame, FrameDecoder};
+use nbe_ipc::frame::FrameDecoder;
 use nbe_ipc::ids::ProcessId;
 use nbe_ipc::message::{IpcEnvelope, IpcMessage};
+use nbe_ipc::pipe::send_envelope;
+use nbe_renderer::eventloop::{EventLoop, Task};
 
 fn main() -> ExitCode {
     nbe_core::logging::init();
@@ -53,8 +57,7 @@ fn parse_pid(args: impl Iterator<Item = String>) -> Option<ProcessId> {
 fn run_protocol(pid: ProcessId) -> Result<(), ModuleError> {
     let stdin = std::io::stdin();
     let mut stdin = stdin.lock();
-    let stdout = std::io::stdout();
-    let mut stdout = stdout.lock();
+    let mut events = EventLoop::new();
     let mut decoder = FrameDecoder::new();
     let mut chunk = [0u8; 4096];
     loop {
@@ -62,7 +65,9 @@ fn run_protocol(pid: ProcessId) -> Result<(), ModuleError> {
             .read(&mut chunk)
             .map_err(|e| ModuleError::new("renderer-stdin", e.to_string()))?;
         if read == 0 {
-            // Browser closed the pipe without Shutdown: treat as clean.
+            // Browser closed the pipe without Shutdown: drain and
+            // treat as clean.
+            events.run_until_idle();
             return Ok(());
         }
         decoder
@@ -75,15 +80,22 @@ fn run_protocol(pid: ProcessId) -> Result<(), ModuleError> {
                 IpcMessage::Initialize => {
                     let reply =
                         IpcEnvelope::new(pid, ProcessId::BROWSER, IpcMessage::Ready { pid });
-                    write_envelope(&mut stdout, &reply)?;
+                    let reply_task: Task = Box::new(move |_handle| {
+                        send_reply(&reply);
+                    });
+                    events.spawn(reply_task);
                 }
                 IpcMessage::Ping { nonce } => {
                     let reply =
                         IpcEnvelope::new(pid, ProcessId::BROWSER, IpcMessage::Pong { nonce });
-                    write_envelope(&mut stdout, &reply)?;
+                    let reply_task: Task = Box::new(move |_handle| {
+                        send_reply(&reply);
+                    });
+                    events.spawn_urgent(reply_task);
                 }
                 IpcMessage::Shutdown => {
                     tracing::info!(pid = %pid, "renderer shutting down");
+                    events.run_until_idle();
                     return Ok(());
                 }
                 _ => {
@@ -91,15 +103,16 @@ fn run_protocol(pid: ProcessId) -> Result<(), ModuleError> {
                 }
             }
         }
+        events.run_until_idle();
     }
 }
 
-fn write_envelope<W: Write>(sink: &mut W, envelope: &IpcEnvelope) -> Result<(), ModuleError> {
-    let payload = serde_json::to_vec(envelope)
-        .map_err(|e| ModuleError::new("renderer-stdout", e.to_string()))?;
-    sink.write_all(&encode_frame(&payload))
-        .map_err(|e| ModuleError::new("renderer-stdout", e.to_string()))?;
-    sink.flush()
-        .map_err(|e| ModuleError::new("renderer-stdout", e.to_string()))?;
-    Ok(())
+/// Write one reply envelope to stdout. IPC failures are logged and
+/// swallowed: a dead browser shows up as stdin EOF, a clean exit.
+fn send_reply(reply: &IpcEnvelope) {
+    let stdout = std::io::stdout();
+    let mut lock = stdout.lock();
+    if let Err(e) = send_envelope(&mut lock, reply) {
+        tracing::error!(error = %e, "reply failed");
+    }
 }

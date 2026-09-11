@@ -22,3 +22,6 @@ vN to vN+1: additive only. Breaking changes: new major row + amendment.
 | C-013 | WebIDL subset parser | nbe_bindings::idl | v1 | PP-05 | frozen |
 | C-014 | Rust interface generator | nbe_bindings::gen | v1 | PP-05 | frozen |
 | C-015 | Generated DOM interface traits | nbe_dom::interfaces | v1 | PP-05 | frozen |
+| C-016 | Renderer event loop (lanes, virtual time, turns) | nbe_renderer::eventloop::EventLoop | v1 | PP-06 | frozen |
+| C-017 | Task context handle | nbe_renderer::eventloop::LoopHandle | v1 | PP-06 | frozen |
+| C-018 | Turn outcome reporting | nbe_renderer::eventloop::TurnOutcome | v1 | PP-06 | frozen |
