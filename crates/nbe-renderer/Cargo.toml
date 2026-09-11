@@ -11,4 +11,3 @@ nbe-core = { path = "../nbe-core" }
 nbe-ipc = { path = "../nbe-ipc" }
 serde_json = { workspace = true }
 tracing = { workspace = true }
-tracing-subscriber = { workspace = true }

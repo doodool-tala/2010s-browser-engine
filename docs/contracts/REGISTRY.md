@@ -9,7 +9,7 @@ vN to vN+1: additive only. Breaking changes: new major row + amendment.
 |----|----------|------|---------|-----------|--------|
 | C-001 | Failure taxonomy + invariant! | nbe_core::error | v1 | PP-01 | frozen |
 | C-002 | Engine tick primitive | nbe_core::tick | v1 | PP-01 | frozen |
-| C-003 | Log subscriber init | nbe_core::logging | v1 | PP-01 | frozen |
+| C-003 | Log subscriber init (stderr writer, A6) | nbe_core::logging | v2 | PP-01; A6 | frozen |
 | C-004 | Virtual clock | nbe_core::clock | v1 | PP-02 | frozen |
 | C-005 | Seeded RNG (SplitMix64) | nbe_core::rng | v1 | PP-02 | frozen |
 | C-006 | Golden snapshot framework | nbe_core::snapshot | v1 | PP-02 | frozen |

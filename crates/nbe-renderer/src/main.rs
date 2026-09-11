@@ -14,24 +14,9 @@ use nbe_core::error::ModuleError;
 use nbe_ipc::frame::{encode_frame, FrameDecoder};
 use nbe_ipc::ids::ProcessId;
 use nbe_ipc::message::{IpcEnvelope, IpcMessage};
-use tracing_subscriber::EnvFilter;
-
-/// Renderer logging goes to stderr (ADR-0006): stdout is the IPC wire
-/// and must carry only length-prefixed frames. Same deterministic
-/// contract as nbe_core::logging: no wall-clock, no ANSI, NBE_LOG level.
-fn init_logging() {
-    let level = std::env::var("NBE_LOG").unwrap_or_else(|_| "info".to_string());
-    let filter = EnvFilter::try_new(level).unwrap_or_else(|_| EnvFilter::new("info"));
-    tracing_subscriber::fmt()
-        .with_env_filter(filter)
-        .with_ansi(false)
-        .without_time()
-        .with_writer(std::io::stderr)
-        .init();
-}
 
 fn main() -> ExitCode {
-    init_logging();
+    nbe_core::logging::init();
 
     let pid = match parse_pid(std::env::args().skip(1)) {
         Some(pid) => pid,
