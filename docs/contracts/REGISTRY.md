@@ -28,3 +28,6 @@ vN to vN+1: additive only. Breaking changes: new major row + amendment.
 | C-019 | URL parse + serialize (absolute http/https) | nbe_net::url | v1 | PP-07 | frozen |
 | C-020 | Host model (domain, IPv4, IPv6) | nbe_net::url::Host | v1 | PP-07 | frozen |
 | C-021 | Origin (scheme, host, port) | nbe_net::origin | v1 | PP-07 | frozen |
+| C-022 | Transport trait (fetch abstraction) | nbe_net::loader::Transport | v1 | PP-08 | frozen |
+| C-023 | Resource loader (priority queue, pump turns) | nbe_net::loader::ResourceLoader | v1 | PP-08 | frozen |
+| C-024 | Deterministic LRU resource cache | nbe_net::loader::ResourceLoader (cache) | v1 | PP-08 | frozen |

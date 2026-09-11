@@ -1,15 +1,15 @@
 //! # nbe-net
 //!
-//! Networking for the engine. PP-07 delivers the URL layer: parsing
-//! and serialization for absolute http/https URLs (domain, IPv4, and
-//! IPv6 hosts, dot-segment removal, default-port stripping) and the
-//! origin model that same-origin policy is built on. HTTP fetching,
-//! cookies, MIME sniffing, and the resource cache arrive in later
-//! packages.
+//! Networking for the engine: the URL layer (parsing, serialization,
+//! origin) and the resource loader (priority-ordered fetching over a
+//! transport abstraction, deterministic LRU cache). The real HTTP
+//! transport, cookies, MIME sniffing, and disk persistence arrive in
+//! later packages.
 //!
 //! URL parsing is the engine's first real use of the RecoverableInput
 //! error class: malformed input returns `None` — never an error,
-//! never a crash (ADR-0002).
+//! never a crash (ADR-0002). The loader adds the Module branch:
+//! transport failures are `Err`.
 
 #![deny(missing_docs)]
 #![cfg_attr(
@@ -26,5 +26,6 @@
     )
 )]
 
+pub mod loader;
 pub mod origin;
 pub mod url;
