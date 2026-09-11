@@ -106,7 +106,6 @@ dependencies = [
  "nbe-ipc",
  "serde_json",
  "tracing",
- "tracing-subscriber",
 ]
 
 [[package]]
