@@ -1,0 +1,10 @@
+input@t0
+boot@t0
+spawner@t0
+child@t2
+timer-5@t5
+timer-5b@t5
+timer-10@t10
+turns=6
+render_updates=6
+clock=t10
