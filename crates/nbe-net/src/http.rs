@@ -15,6 +15,7 @@ use std::net::TcpStream;
 
 use nbe_core::error::ModuleError;
 
+use crate::cookies::CookieJar;
 use crate::loader::{Resource, Transport};
 use crate::url::{parse_url, Url};
 
@@ -26,9 +27,12 @@ pub const DEFAULT_MAX_REDIRECTS: u32 = 20;
 const MAX_BODY_BYTES: usize = 64 * 1024 * 1024;
 
 /// An HTTP/1.1 transport: GET-only, one TCP connection per hop.
+/// With a cookie jar attached, cookies flow both ways on every hop.
 pub struct HttpTransport {
     max_redirects: u32,
     user_agent: String,
+    cookie_jar: Option<CookieJar>,
+    epoch_secs: u64,
 }
 
 impl HttpTransport {
@@ -38,6 +42,8 @@ impl HttpTransport {
         Self {
             max_redirects: DEFAULT_MAX_REDIRECTS,
             user_agent: String::from("nbe/0.1"),
+            cookie_jar: None,
+            epoch_secs: 0,
         }
     }
 
@@ -46,6 +52,22 @@ impl HttpTransport {
     pub fn with_max_redirects(mut self, max_redirects: u32) -> Self {
         self.max_redirects = max_redirects;
         self
+    }
+
+    /// Attach a cookie jar: outgoing requests carry matching cookies,
+    /// and every response's Set-Cookie headers are stored.
+    #[must_use]
+    pub fn with_cookie_jar(mut self, jar: CookieJar) -> Self {
+        self.cookie_jar = Some(jar);
+        self
+    }
+
+    /// Set the wall-clock epoch (seconds) used for cookie expiry.
+    /// Deterministic by default (0); tests set it explicitly, and the
+    /// browser process will supply real time at its boundary
+    /// (ADR-0003 keeps wall-clock out of engine code).
+    pub fn set_epoch_secs(&mut self, epoch_secs: u64) {
+        self.epoch_secs = epoch_secs;
     }
 }
 
@@ -68,7 +90,18 @@ impl Transport for HttpTransport {
         let mut current = url.clone();
         let mut hops: u32 = 0;
         loop {
-            match fetch_once(&current, &self.user_agent)? {
+            let cookie_header = self
+                .cookie_jar
+                .as_ref()
+                .and_then(|jar| jar.cookie_header(&current, self.epoch_secs));
+            let (outcome, headers) =
+                fetch_once(&current, &self.user_agent, cookie_header.as_deref())?;
+            if let Some(jar) = &mut self.cookie_jar {
+                for value in header_values(&headers, "set-cookie") {
+                    jar.store(&current, value, self.epoch_secs);
+                }
+            }
+            match outcome {
                 Outcome::Body(resource) => return Ok(resource),
                 Outcome::Redirect(location) => {
                     if hops >= self.max_redirects {
@@ -82,7 +115,11 @@ impl Transport for HttpTransport {
     }
 }
 
-fn fetch_once(url: &Url, user_agent: &str) -> Result<Outcome, ModuleError> {
+fn fetch_once(
+    url: &Url,
+    user_agent: &str,
+    cookie_header: Option<&str>,
+) -> Result<(Outcome, Vec<(String, String)>), ModuleError> {
     if url.scheme().is_tls() {
         return Err(ModuleError::new(
             "http",
@@ -96,9 +133,14 @@ fn fetch_once(url: &Url, user_agent: &str) -> Result<Outcome, ModuleError> {
         None => url.host().to_string(),
     };
     let target = request_target(url);
-    let request = format!(
-        "GET {target} HTTP/1.1\r\nHost: {host_header}\r\nUser-Agent: {user_agent}\r\nAccept: */*\r\nAccept-Encoding: identity\r\nConnection: close\r\n\r\n"
-    );
+    let request = match cookie_header {
+        Some(cookies) => format!(
+            "GET {target} HTTP/1.1\r\nHost: {host_header}\r\nUser-Agent: {user_agent}\r\nAccept: */*\r\nAccept-Encoding: identity\r\nCookie: {cookies}\r\nConnection: close\r\n\r\n"
+        ),
+        None => format!(
+            "GET {target} HTTP/1.1\r\nHost: {host_header}\r\nUser-Agent: {user_agent}\r\nAccept: */*\r\nAccept-Encoding: identity\r\nConnection: close\r\n\r\n"
+        ),
+    };
     let mut stream = TcpStream::connect(connect_to.as_str())
         .map_err(|e| ModuleError::new("http", format!("connect failed: {e}")))?;
     stream
@@ -110,13 +152,13 @@ fn fetch_once(url: &Url, user_agent: &str) -> Result<Outcome, ModuleError> {
     let mut reader = BufReader::new(stream);
     let status = parse_status(&read_crlf_line(&mut reader)?)?;
     let headers = parse_headers(&mut reader)?;
-    let content_type = header_value(&headers, "content-type").map(str::to_string);
     let body = read_body(&mut reader, &headers)?;
     if (200..300).contains(&status) {
-        Ok(Outcome::Body(Resource::new(body, content_type)))
+        let content_type = header_value(&headers, "content-type").map(str::to_string);
+        Ok((Outcome::Body(Resource::new(body, content_type)), headers))
     } else if (300..400).contains(&status) {
         match header_value(&headers, "location") {
-            Some(location) => Ok(Outcome::Redirect(location.to_string())),
+            Some(location) => Ok((Outcome::Redirect(location.to_string()), headers)),
             None => Err(ModuleError::new(
                 "http",
                 "redirect without a location header",
@@ -225,6 +267,14 @@ fn header_value<'a>(headers: &'a [(String, String)], name: &str) -> Option<&'a s
         .iter()
         .find(|(key, _)| key == name)
         .map(|(_, value)| value.as_str())
+}
+
+fn header_values<'a>(headers: &'a [(String, String)], name: &str) -> Vec<&'a str> {
+    headers
+        .iter()
+        .filter(|(key, _)| key == name)
+        .map(|(_, value)| value.as_str())
+        .collect()
 }
 
 fn read_body(

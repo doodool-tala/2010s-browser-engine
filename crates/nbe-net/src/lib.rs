@@ -2,14 +2,15 @@
 //!
 //! Networking for the engine: the URL layer (parsing, serialization,
 //! origin), the resource loader (priority-ordered fetching over a
-//! transport abstraction, deterministic LRU cache), and the HTTP/1.1
-//! transport that implements it over real TCP sockets. Cookies, MIME
-//! sniffing, TLS, and disk persistence arrive in later packages.
+//! transport abstraction, deterministic LRU cache), the HTTP/1.1
+//! transport with its cookie jar, and the RFC 6265 cookie model
+//! itself. MIME sniffing, TLS, and disk persistence arrive in later
+//! packages.
 //!
 //! URL parsing is the engine's first real use of the RecoverableInput
 //! error class: malformed input returns `None` — never an error,
-//! never a crash (ADR-0002). The loader and transport add the Module
-//! branch: network failures are `Err`.
+//! never a crash (ADR-0002). The loader, transport, and cookie
+//! layers add the Module branch: network failures are `Err`.
 
 #![deny(missing_docs)]
 #![cfg_attr(
@@ -26,6 +27,7 @@
     )
 )]
 
+pub mod cookies;
 pub mod http;
 pub mod loader;
 pub mod origin;
