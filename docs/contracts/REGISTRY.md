@@ -31,3 +31,6 @@ vN to vN+1: additive only. Breaking changes: new major row + amendment.
 | C-022 | Transport trait (fetch abstraction) | nbe_net::loader::Transport | v1 | PP-08 | frozen |
 | C-023 | Resource loader (priority queue, pump turns) | nbe_net::loader::ResourceLoader | v1 | PP-08 | frozen |
 | C-024 | Deterministic LRU resource cache | nbe_net::loader::ResourceLoader (cache) | v1 | PP-08 | frozen |
+| C-025 | HTTP/1.1 transport (Transport impl) | nbe_net::http::HttpTransport | v1 | PP-09 | frozen |
+| C-026 | HTTP/1.1 response parsing and body framing | nbe_net::http | v1 | PP-09 | frozen |
+| C-027 | Redirect resolution (absolute + root-relative) | nbe_net::http | v1 | PP-09 | frozen |
