@@ -1,0 +1,7 @@
+http://a.example.com/x@100: sid=abc
+http://a.example.com/x@110: sid=abc; theme=dark
+http://a.example.com/x@160: sid=abc
+http://b.example.com/x@160: k=1
+http://a.example.com/x@160: sid=abc; k=1
+http://a.example.com/x@200: sid=abc; k=2
+count=3

@@ -6,6 +6,7 @@ use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::sync::mpsc;
 
+use nbe_net::cookies::CookieJar;
 use nbe_net::http::HttpTransport;
 use nbe_net::loader::Transport;
 use nbe_net::url::parse_url;
@@ -217,4 +218,24 @@ fn connection_refusal_is_a_module_error() {
     let url = parse_url(&format!("http://127.0.0.1:{port}/x")).unwrap();
     let mut transport = HttpTransport::new();
     assert!(transport.fetch(&url).is_err());
+}
+
+#[test]
+fn cookies_flow_through_the_transport() {
+    let server = serve(|_| {
+        vec![
+            b"HTTP/1.1 200 X\r\nContent-Type: text/plain\r\nSet-Cookie: sid=abc; Path=/\r\nContent-Length: 2\r\n\r\nok".to_vec(),
+            response_with_length(200, "text/plain", b"ok2"),
+        ]
+    });
+    let first = parse_url(&format!("{}/first", server.base())).unwrap();
+    let second = parse_url(&format!("{}/second", server.base())).unwrap();
+    let mut transport = HttpTransport::new().with_cookie_jar(CookieJar::new());
+    let resource = transport.fetch(&first).unwrap();
+    assert_eq!(resource.bytes(), b"ok");
+    let resource = transport.fetch(&second).unwrap();
+    assert_eq!(resource.bytes(), b"ok2");
+    let requests = server.take_requests(2);
+    assert!(!requests[0].contains("Cookie:"));
+    assert!(requests[1].contains("Cookie: sid=abc\r\n"));
 }
